@@ -1,4 +1,4 @@
-from typing import Mapping
+from typing import Mapping, Sequence
 
 from .abstract import BenchmarkHarness
 from .cpu import CPUHarness
@@ -10,3 +10,5 @@ harness_class_by_name: Mapping[str, type[BenchmarkHarness]] = {
         CPUHarness, TritonHarness, CUDAHarness,
     )
 }
+
+auto_select_preference: Sequence[str] = ('cuda', 'triton')

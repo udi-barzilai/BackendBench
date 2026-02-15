@@ -199,7 +199,7 @@ class TestEvalOneOp:
         performance_tests = [TestCase([torch.tensor([-1.0, 0.0, 1.0])], {}) for _ in range(2)]
 
         correctness, performance, correctness_results, performance_results = eval_one_op(
-            op, impl, correctness_tests, performance_tests
+            op, impl, correctness_tests, performance_tests, harness_name="cpu"
         )
 
         # Should have perfect correctness since using same implementation

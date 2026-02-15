@@ -158,6 +158,12 @@ def setup_logging(log_level):
     default=False,
     help="Load C++ source code for Cuda kernels. When set to False BackendBench will construct cpp source files from the given cuda source code.",
 )
+@click.option(
+    "--harness",
+    default=None,
+    type=click.Choice(["cuda", "triton", "cpu"]),
+    help="Benchmark harness to use for performance measurement (default: auto-select)",
+)
 def cli(
     log_level,
     suite,
@@ -178,6 +184,7 @@ def cli(
     dsl,
     daemon,
     load_cpp_source,
+    harness,
 ):
     if suite != "torchbench":
         if topn_inputs is not None:
@@ -263,6 +270,7 @@ def cli(
                 backend[test.op],
                 test.correctness_tests,
                 test.performance_tests,
+                harness_name=harness,
             )
 
             overall_correctness.append(all(result.is_correct for result in correctness_results))

@@ -1,4 +1,6 @@
 
+from dataclasses import field
+
 from ..abstract import *
 from .timer import CUDAWorkTimer as Timer
 
@@ -12,7 +14,7 @@ class Settings:
     run_count_measured: int = 100
     run_count_warmup: int = 10
     outlier_iqr_threshold: float = 1.5
-    cuda: Timer.Settings = Timer.Settings()
+    cuda: Timer.Settings = field(default_factory=Timer.Settings)
 
 
 class CUDAHarness(BenchmarkHarness[Settings]):

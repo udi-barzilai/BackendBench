@@ -83,7 +83,7 @@ class EventPair(NamedTuple):
         self.stop.record()
     def synchronize(self):
         self.start.synchronize()
-        self.start.synchronize()
+        self.stop.synchronize()
     def elapsed_millis(self):
         self.synchronize()
         return self.start.elapsed_time(self.stop)
@@ -113,7 +113,7 @@ def _get_cuda_delay_function():
         # import here to avoid making this a package init-time dependency
         # noinspection PyBroadException
         try:
-            from _delay_kernel import cuda_busy_wait as func
+            from ._delay_kernel import cuda_busy_wait as func
         except Exception:
             func = False
         _get_cuda_delay_function.cached_value = func
