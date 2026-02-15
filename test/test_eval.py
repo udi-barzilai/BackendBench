@@ -10,9 +10,9 @@ import numpy as np
 import pytest
 import torch
 
+from BackendBench.benchmarking import CPUHarness
 from BackendBench.eval import (
     allclose,
-    cpu_bench,
     eval_correctness,
     eval_correctness_test,
     eval_one_op,
@@ -165,19 +165,22 @@ class TestEvalCorrectness:
 
 
 class TestEvalPerformance:
-    def test_cpu_bench(self):
+    def test_cpu_harness_bench(self):
         counter = 0
 
         def test_fn():
             nonlocal counter
             counter += 1
 
+        harness = CPUHarness()
+        assert harness.is_available()
+
         # Actually run the benchmark
-        time_per_run = cpu_bench(test_fn, num_runs=10)
+        time_ms = harness.bench(test_fn, num_runs=10)
 
         # Should have run 10 warmup runs + 10 actual runs = 20 total
         assert counter == 20
-        assert time_per_run > 0
+        assert time_ms > 0
 
 
 class TestEvalOneOp:
