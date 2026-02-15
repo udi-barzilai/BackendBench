@@ -62,6 +62,8 @@ class CUDAHarness(BenchmarkHarness[Settings]):
                 fn()
             run_times[i] = timer.timing_events.elapsed_millis()
 
+        self.last_raw_run_times = run_times
+
         oit = s.outlier_iqr_threshold
         if oit is not None:
             # IQR outlier removal (see https://en.wikipedia.org/wiki/Interquartile_range)
@@ -69,10 +71,14 @@ class CUDAHarness(BenchmarkHarness[Settings]):
             if _iqr_quantiles is None:
                 _iqr_quantiles = run_times.new_tensor((0.25, 0.75))
             q1, q3 = run_times.quantile(_iqr_quantiles)
-            span = (q3 - q1) * s.outlier_iqr_threshold
-            is_not_outlier = run_times > q1 - span
-            is_not_outlier.logical_and_(run_times < q3 + span)
-            run_times = run_times[is_not_outlier]
+            iqr = q3 - q1
+            if iqr > 0:
+                span = iqr * s.outlier_iqr_threshold
+                is_not_outlier = run_times >= q1 - span
+                is_not_outlier.logical_and_(run_times <= q3 + span)
+                run_times = run_times[is_not_outlier]
+
+        self.last_filtered_run_times = run_times
 
         return run_times.mean().item()
 
