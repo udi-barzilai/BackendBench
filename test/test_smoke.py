@@ -31,6 +31,7 @@ class TestSmoke:
                 aten_backend[test.op],
                 test.correctness_tests,
                 test.performance_tests,
+                harness_name="cpu",
             )
 
             is_correct = all(result.is_correct for result in correctness_results)

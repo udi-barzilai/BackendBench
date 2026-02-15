@@ -137,7 +137,7 @@ def eval_correctness(op, impl, tests) -> Tuple[float, List[CorrectnessTestResult
     return correct / total, test_results
 
 
-def eval_performance(op, impl, tests, harness_name=None) -> Tuple[float, List[PerformanceTestResult]]:
+def eval_performance(op, impl, tests, harness_name: str) -> Tuple[float, List[PerformanceTestResult]]:
     """Evaluate performance of impl against tests."""
     harness = BenchmarkHarness.create(harness_name)
     bench_fn = harness.measure_runtime_milliseconds
@@ -202,7 +202,7 @@ def eval_performance(op, impl, tests, harness_name=None) -> Tuple[float, List[Pe
 
 
 def eval_one_op(
-    op, impl, correctness_tests, performance_tests, harness_name=None
+    op, impl, correctness_tests, performance_tests, harness_name: str
 ) -> Tuple[float, float, List[CorrectnessTestResult], List[PerformanceTestResult]]:
     """Evaluate impl of op against correctness_tests and performance_tests.
 

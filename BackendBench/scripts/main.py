@@ -253,6 +253,18 @@ def cli(
             timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
             log_dir = f"backendbench_output_{timestamp}"
 
+    if harness is None:
+        from BackendBench.benchmarking._registry import harness_class_by_name, auto_select_preference
+        for candidate in auto_select_preference:
+            if harness_class_by_name[candidate].is_available():
+                harness = candidate
+                break
+        else:
+            raise RuntimeError(
+                "No benchmark harness available. Checked: "
+                + ", ".join(auto_select_preference))
+    print(f"Benchmark harness: {harness}")
+
     overall_correctness = []
     overall_performance = []
     all_correctness_results = []
