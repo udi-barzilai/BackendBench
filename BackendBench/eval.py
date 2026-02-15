@@ -12,6 +12,7 @@ from typing import List, Tuple
 
 import torch
 
+from BackendBench.benchmarking import get_harness
 from BackendBench.utils import compute_errors, serialize_args, uses_cuda_stream
 
 
@@ -39,16 +40,6 @@ class PerformanceTestResult:
     successfully_ran: bool = False
     test_type: str = "performance"
 
-
-try:
-    if torch.cuda.is_available():
-        import triton.testing
-
-        TRITON_AVAILABLE = True
-    else:
-        TRITON_AVAILABLE = False
-except ImportError:
-    TRITON_AVAILABLE = False
 
 logger = logging.getLogger(__name__)
 
@@ -146,24 +137,10 @@ def eval_correctness(op, impl, tests) -> Tuple[float, List[CorrectnessTestResult
     return correct / total, test_results
 
 
-def cpu_bench(fn, num_runs=100):
-    """Simple CPU benchmarking using time.perf_counter."""
-    import time
-
-    for _ in range(10):
-        fn()
-
-    start = time.perf_counter()
-    for _ in range(num_runs):
-        fn()
-    return (time.perf_counter() - start) / num_runs
-
-
 def eval_performance(op, impl, tests) -> Tuple[float, List[PerformanceTestResult]]:
     """Evaluate performance of impl against tests."""
-    bench_fn = (
-        triton.testing.do_bench if TRITON_AVAILABLE and torch.cuda.is_available() else cpu_bench
-    )
+    harness = get_harness()
+    bench_fn = harness.bench
     base_times = []
     test_times = []
     args_strs = []
