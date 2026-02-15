@@ -12,7 +12,7 @@ from typing import List, Tuple
 
 import torch
 
-from BackendBench.benchmarking import get_harness
+from BackendBench.benchmarking import BenchmarkHarness
 from BackendBench.utils import compute_errors, serialize_args, uses_cuda_stream
 
 
@@ -139,8 +139,8 @@ def eval_correctness(op, impl, tests) -> Tuple[float, List[CorrectnessTestResult
 
 def eval_performance(op, impl, tests) -> Tuple[float, List[PerformanceTestResult]]:
     """Evaluate performance of impl against tests."""
-    harness = get_harness()
-    bench_fn = harness.bench
+    benchmarking_harness = BenchmarkHarness.create(something)
+    bench_fn = benchmarking_harness.measure_runtime_milliseconds
     base_times = []
     test_times = []
     args_strs = []

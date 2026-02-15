@@ -7,11 +7,4 @@
 from .abstract import BenchmarkHarness
 from .cpu import CPUHarness
 from .triton import TritonHarness
-from ._registry import get_harness
-
-__all__ = [
-    "BenchmarkHarness",
-    "CPUHarness",
-    "TritonHarness",
-    "get_harness",
-]
+from .cuda import CUDAHarness

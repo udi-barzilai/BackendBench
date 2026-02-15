@@ -1,28 +1,39 @@
-# Copyright (c) Meta Platforms, Inc. and affiliates.
-# All rights reserved.
-#
-# This source code is licensed under the BSD 3-Clause license found in the
-# LICENSE file in the root directory of this source tree.
+from time import perf_counter as get_perf_counter
 
-import time
-from typing import Any, Callable
-
-from .abstract import BenchmarkHarness
+from ._common import *
+from .abstract import *
 
 
-class CPUHarness(BenchmarkHarness):
-    def __init__(self):
-        super().__init__("cpu")
+__all__ = 'CPUHarness',
 
-    def is_available(self) -> bool:
+
+@settings_class
+class Settings:
+    run_count_measured: int = 100
+    run_count_warmup: int = 10
+
+
+class CPUHarness(BenchmarkHarness[Settings]):
+    Settings = Settings
+
+    @classmethod
+    def is_available(cls):
         return True
 
-    def bench(self, fn: Callable[[], Any], num_runs: int = 100) -> float:
-        for _ in range(10):
-            fn()
+    @classmethod
+    def default_settings(cls):
+        return Settings()
 
-        start = time.perf_counter()
-        for _ in range(num_runs):
+    @classmethod
+    def _get_harness_name(cls) -> str:
+        return 'cpu'
+
+    def measure_runtime_milliseconds(self, fn: BenchMarkedFunction) -> float:
+        s = self.settings
+        for _ in range(s.run_count_warmup):
             fn()
-        elapsed_s = (time.perf_counter() - start) / num_runs
-        return elapsed_s * 1000.0
+        start = get_perf_counter()
+        for _ in range(s.run_count_measured):
+            fn()
+        elapsed_s = (get_perf_counter() - start) / s.run_count_measured
+        return elapsed_s * millis_per_second

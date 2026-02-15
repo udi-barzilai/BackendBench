@@ -1,31 +1,42 @@
-# Copyright (c) Meta Platforms, Inc. and affiliates.
-# All rights reserved.
-#
-# This source code is licensed under the BSD 3-Clause license found in the
-# LICENSE file in the root directory of this source tree.
+from typing import Literal
 
-from typing import Any, Callable
-
-import torch
-
-from .abstract import BenchmarkHarness
+from torch import cuda
+from .abstract import *
 
 
-class TritonHarness(BenchmarkHarness):
-    def __init__(self):
-        super().__init__("triton")
+__all__ = 'TritonHarness',
 
-    def is_available(self) -> bool:
-        try:
-            if torch.cuda.is_available():
-                import triton.testing  # noqa: F401
 
-                return True
+@settings_class
+class Settings:
+    run_time_measured_millis: int = 100
+    run_time_warmup_millis: int = 10
+    returned_stat: Literal['min', 'max', 'mean', 'median'] = 'mean'
+
+
+class TritonHarness(BenchmarkHarness[Settings]):
+    Settings = Settings
+
+    @classmethod
+    def is_available(cls) -> bool:
+        if not cuda.is_available():
             return False
+        try:
+            from triton.testing import do_bench  # noqa: F401
         except ImportError:
             return False
+        return True
 
-    def bench(self, fn: Callable[[], Any]) -> float:
-        import triton.testing
+    @classmethod
+    def default_settings(cls):
+        return Settings()
 
-        return triton.testing.do_bench(fn)
+    @classmethod
+    def _get_harness_name(cls):
+        return 'triton'
+
+    def measure_runtime_milliseconds(self, fn: BenchMarkedFunction) -> float:
+        from triton.testing import do_bench
+        s = self.settings
+        return do_bench(
+            fn, warmup=s.run_time_warmup_millis, rep=s.run_time_measured_millis, return_mode=s.returned_stat)

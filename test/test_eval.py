@@ -172,11 +172,13 @@ class TestEvalPerformance:
             nonlocal counter
             counter += 1
 
-        harness = CPUHarness()
-        assert harness.is_available()
+        assert CPUHarness.is_available()
+        harness_settings = CPUHarness.default_settings()
+        harness_settings.run_count_measured = 10
+        harness = CPUHarness(settings=harness_settings)
 
         # Actually run the benchmark
-        time_ms = harness.bench(test_fn, num_runs=10)
+        time_ms = harness.measure_runtime_milliseconds(test_fn)
 
         # Should have run 10 warmup runs + 10 actual runs = 20 total
         assert counter == 20
