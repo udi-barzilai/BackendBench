@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Callable, Any, NamedTuple
+from typing import Callable, NamedTuple
 # noinspection PyPep8Naming
 from torch import Tensor, device as Device, empty, uint8, cuda
 from torch.cuda import Event, Stream, get_device_properties, synchronize as device_synchronize, current_stream
@@ -18,7 +18,7 @@ class CUDAWorkTimer:
         enable_l2_flush: bool = True
         enable_device_synchronize_before: bool = True
         enable_device_synchronize_after: bool = True
-        cycle_count_pre_launch_delay: int = 50 * 1_500_000   # ~50ms with a 1500MHz clock
+        cycle_count_pre_launch_delay: int = 12 * 1_500_000   # ~50ms with a 1500MHz clock
 
     def __init__(self, device: Device, *, settings: Settings = Settings()):
         self.settings = settings
@@ -119,5 +119,3 @@ def _get_cuda_delay_function():
         _get_cuda_delay_function.cached_value = func
     return func
 _get_cuda_delay_function.cached_value = None
-
-

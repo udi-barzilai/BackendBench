@@ -11,8 +11,8 @@ __all__ = 'CUDAHarness',
 @settings_class
 class Settings:
     device_name: str = None  # None = use the current CUDA device at harness construction time
-    run_count_measured: int = 100
-    run_count_warmup: int = 10
+    run_count_measured: int = 64
+    run_count_warmup: int = 8
     outlier_iqr_threshold: float = 1.5
     cuda: Timer.Settings = field(default_factory=Timer.Settings)
 
@@ -62,8 +62,6 @@ class CUDAHarness(BenchmarkHarness[Settings]):
                 fn()
             run_times[i] = timer.timing_events.elapsed_millis()
 
-        self.last_raw_run_times = run_times
-
         oit = s.outlier_iqr_threshold
         if oit is not None:
             # IQR outlier removal (see https://en.wikipedia.org/wiki/Interquartile_range)
@@ -77,8 +75,6 @@ class CUDAHarness(BenchmarkHarness[Settings]):
                 is_not_outlier = run_times >= q1 - span
                 is_not_outlier.logical_and_(run_times <= q3 + span)
                 run_times = run_times[is_not_outlier]
-
-        self.last_filtered_run_times = run_times
 
         return run_times.mean().item()
 
